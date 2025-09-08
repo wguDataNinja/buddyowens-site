@@ -18,18 +18,9 @@ The output is a reproducible pipeline that generates an **interactive bubble map
 
 <!--more-->
 
+
 ## Interactive Map
-
-<div style="position:relative;padding-top:56.25%;">
-
-<iframe
-  src="{{ "maps/university_bubble_map.html" | relURL }}"
-  loading="lazy"
-  title="WGU Instructor Alma Maters — Bubble Map"
-  style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;">
-</iframe>
-
-</div>
+{{< iframe_res src="maps/university_bubble_map.html" title="WGU Instructor Alma Maters — Bubble Map" >}}
 
 ---
 ## Geocoding the Universities

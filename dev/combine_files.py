@@ -3,25 +3,38 @@ from pathlib import Path
 import sys
 import fnmatch
 import subprocess
-import time
 
 # ---- tweakable settings (no CLI) ----
 MAX_TOTAL_BYTES = 80_000
 MAX_PER_FILE_BYTES = 12_000
-GIT_SINCE_DAYS = 540               # only include files changed in this window if git info is available
-USE_GIT = True                     # auto-filters to tracked + recently-changed files when possible
+GIT_SINCE_DAYS = 540
+USE_GIT = True
 ROOT_MARKERS = {"hugo.toml", ".git"}
 
-# include only what you typically hand-edit for Hugo sites
+# include typical hand-edited Hugo files + map assets
 INCLUDE_GLOBS = [
+    # config
     "hugo.toml", "config.*", "netlify.toml", "vercel.json",
+
+    # package/build (optional but useful)
     "package.json", "pnpm-lock.yaml", "package-lock.json", "yarn.lock",
     "postcss.config.*", "tailwind.config.*", "tsconfig.*", ".nvmrc",
+
+    # site content and layouts
     "content/**/*.md", "content/**/_index.md",
     "layouts/**/*.html", "layouts/**/*.xml", "layouts/**/*.tmpl",
     "layouts/**/*.md", "layouts/partials/**/*", "layouts/shortcodes/**/*",
+
+    # assets (css/js/ts)
     "assets/**/*.[sc]css", "assets/**/*.[jt]s", "assets/**/*.[jt]sx", "assets/**/*.ts",
+
+    # static assets (include html so maps show up; include css/js/images for Folium/Plotly)
+    "static/**/*.html",
     "static/**/*.css", "static/**/*.js",
+    "static/**/*.png", "static/**/*.jpg", "static/**/*.jpeg", "static/**/*.svg",
+    "static/**/*.json", "static/**/*.geojson",
+
+    # data and archetypes
     "data/**/*.yaml", "data/**/*.yml", "data/**/*.toml", "data/**/*.json",
     "archetypes/**/*",
 ]
@@ -32,8 +45,8 @@ EXCLUDE_DIRS = {
     ".vscode", "output", ".cache", "dist", "build", "__pycache__", "themes",
 }
 
-# optionally allow your custom theme if you truly edit it
-OPTIONAL_THEME_DIRS = set()  # e.g., {"themes/my-custom-theme"}
+# allow explicit theme dirs if you actually edit them
+OPTIONAL_THEME_DIRS: set[str] = set()
 # -------------------------------------
 
 def find_repo_root(start: Path) -> Path:
@@ -51,7 +64,6 @@ def is_excluded(path: Path, root: Path) -> bool:
         rel_parts = path.relative_to(root).parts
     except ValueError:
         rel_parts = path.parts
-    # permit explicitly whitelisted theme dirs
     if "themes" in rel_parts and not any(str(path).startswith(str(root / d)) for d in OPTIONAL_THEME_DIRS):
         return True
     if any(part in EXCLUDE_DIRS for part in rel_parts):
@@ -69,45 +81,42 @@ def git_tracked_recent(root: Path) -> set[str]:
     if not USE_GIT or not (root / ".git").exists():
         return set()
     try:
-        # tracked files
         tracked = subprocess.check_output(
             ["git", "-C", str(root), "ls-files"], text=True
         ).splitlines()
-
-        # recently changed files
         since = f"{GIT_SINCE_DAYS}.days"
         recent = subprocess.check_output(
             ["git", "-C", str(root), "log", f"--since={since}", "--name-only", "--pretty=format:"],
             text=True
         ).splitlines()
-
-        # staged or unstaged changes right now
         status = subprocess.check_output(
             ["git", "-C", str(root), "status", "--porcelain"], text=True
         ).splitlines()
         status_files = [line[3:] for line in status if len(line) > 3]
-
         return set(filter(None, tracked + recent + status_files))
     except Exception:
         return set()
 
 def priority_key(p: Path, root: Path) -> tuple[int, str]:
+    """Lower tier number = higher priority in the combined output."""
     rel = str(p.relative_to(root))
-    # simple tiering
+    # Boost maps so you can spot issues fast
+    if rel.startswith("static/maps/"):
+        return (0, rel.lower())
     tiers = [
-        ("hugo.toml", 0),
-        ("config.", 0),
-        ("layouts/", 1),
-        ("layouts/partials/", 0),
-        ("layouts/shortcodes/", 0),
-        ("content/", 2),
-        ("assets/", 3),
-        ("static/", 4),
-        ("data/", 5),
-        ("archetypes/", 6),
-        ("package.json", 1),
-        ("tailwind.config", 1),
-        ("postcss.config", 1),
+        ("hugo.toml", 1),
+        ("config.", 1),
+        ("layouts/partials/", 2),
+        ("layouts/shortcodes/", 2),
+        ("layouts/", 3),
+        ("content/", 4),
+        ("assets/", 5),
+        ("static/", 6),
+        ("data/", 7),
+        ("archetypes/", 8),
+        ("package.json", 3),
+        ("tailwind.config", 3),
+        ("postcss.config", 3),
     ]
     for prefix, t in tiers:
         if rel.startswith(prefix):
@@ -122,6 +131,17 @@ def code_fence_lang(suffix: str) -> str:
         ".sh": "bash", ".zsh": "bash", ".bash": "bash",
     }
     return m.get(suffix.lower(), "")
+
+def read_trimmed(fp: Path) -> str:
+    try:
+        raw = fp.read_bytes()
+    except Exception:
+        return "[unreadable]\n"
+    if len(raw) <= MAX_PER_FILE_BYTES:
+        return raw.decode("utf-8", errors="replace")
+    head = raw[: MAX_PER_FILE_BYTES // 2]
+    tail = raw[-MAX_PER_FILE_BYTES // 2 :]
+    return head.decode("utf-8", errors="replace") + "\n# … trimmed …\n" + tail.decode("utf-8", errors="replace")
 
 def candidate_files(root: Path) -> list[Path]:
     tracked_recent = git_tracked_recent(root)
@@ -140,18 +160,6 @@ def candidate_files(root: Path) -> list[Path]:
         files.append(p)
     files.sort(key=lambda x: priority_key(x, root))
     return files
-
-def read_trimmed(fp: Path) -> str:
-    try:
-        raw = fp.read_bytes()
-    except Exception:
-        return "[unreadable]\n"
-    if len(raw) <= MAX_PER_FILE_BYTES:
-        return raw.decode("utf-8", errors="replace")
-    # keep head and tail with a small divider
-    head = raw[: MAX_PER_FILE_BYTES // 2]
-    tail = raw[-MAX_PER_FILE_BYTES // 2 :]
-    return head.decode("utf-8", errors="replace") + "\n# … trimmed …\n" + tail.decode("utf-8", errors="replace")
 
 def write_combined(root: Path, out_file: Path) -> None:
     out_file.parent.mkdir(parents=True, exist_ok=True)
