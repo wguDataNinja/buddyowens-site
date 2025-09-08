@@ -11,52 +11,51 @@ hiddenInList = false
 hiddenInSingle = false
 +++
 
-# Geocoding and Maps
-
-In Part 2, I map WGU instructor alma maters by geocoding each university from the cleaned CSV.  
-The output is a reproducible pipeline that generates an **interactive bubble map** showing where instructors earned their degrees.
-
+## Geocoding and Maps  
+Part 2 of 3: Geocode alma mater university locations using the Google Maps API to produce an interactive bubble map of WGU instructors’ degrees.  
 <!--more-->
 
 
 ## Interactive Map
 {{< iframe_res src="maps/university_bubble_map.html" title="WGU Instructor Alma Maters — Bubble Map" >}}
 
----
-## Geocoding the Universities
+---## From Part 1: Scraping the Catalog  
+In [Part 1](../wgu-instructor-atlas-1/), we parsed the June 2025 catalog into a clean dataset of WGU instructors and their alma maters:  
+[2025_06_instructors.csv](../wgu-instructor-atlas-1/2025_06_instructors.csv).  
 
-To locate each institution, I used the **Google Maps Geocoding API**.  
-- Created a Google Cloud project and enabled the Geocoding service.  
-- Generated an API key and stored it in `apikey.yaml` (kept private).  
-- Google provides $200 of free credit per month; all ~350 unique lookups for this dataset stayed well within the free tier.  
-- Results were cached in `uni_geo_mapping.json` to avoid duplicate requests.  
-- A few ambiguous names were corrected with manual overrides.  
+That CSV serves as the input here. Each university name is geocoded to latitude/longitude coordinates, producing an interactive map of instructor origins.  
 
 ---
 
-## Data Flow
+## Geocoding the Universities  
 
-- Output CSV: [university_counts_with_geo.csv](university_counts_with_geo.csv)  
-- Interactive map: [/maps/university_bubble_map.html](/maps/university_bubble_map.html)  
-
----
-
-## Script
-
-- [`make_bubble_map.py`](make_bubble_map.py) — reads the instructor CSV, joins counts with cached coordinates, writes the joined dataset, and produces the interactive bubble map.
+Using the **Google Maps Geocoding API**:  
+- Enabled the service in a Google Cloud project  
+- Stored the API key privately in `apikey.yaml`  
+- ~350 unique lookups, all within the free $200/month credit  
+- Cached results in `uni_geo_mapping.json`  
+- Corrected a handful of ambiguous names manually  
 
 ---
 
-## Notes and Next
+## Outputs  
 
-- ~350 unique universities successfully mapped after a few manual fixes  
-- Total cost: **$0** (entirely within Google’s free tier)  
-- The bubble map highlights instructor clusters across the U.S. with a handful abroad  
+- [university_counts_with_geo.csv](university_counts_with_geo.csv) — counts with coordinates  
+- [university_bubble_map.html](/maps/university_bubble_map.html) — interactive bubble map  
+- [make_bubble_map.py](../wgu-instructor-atlas-2/make_bubble_map.py) — pipeline script  
+
+---
+
+## Notes and Next  
+
+- ~350 universities successfully mapped  
+- Total cost: **$0** (fully within free tier)  
+- Map shows instructor clusters across the U.S. with a handful abroad  
 
 ## Next in the Series
 
 In **Part 3**, we’ll move beyond alma maters to the **research output of WGU faculty**.  
-Using the [Semantic Scholar API](https://api.semanticscholar.org/), I’ll:  
+Using the [Semantic Scholar API](https://api.semanticscholar.org/), we:  
 - Query by instructor name and institution to identify published works  
 - Build a reproducible archive of journal articles, conference papers, and books  
 - Link each publication back to the normalized instructor dataset  
