@@ -46,7 +46,7 @@ This walkthrough produces several files you can explore directly:
 - [instructor_alma_maters.csv](instructor_alma_maters.csv) — alma mater counts by institution  
 - [college_degree_barchart.png](images/college_degree_barchart.png) — degree mix by college
 
-### Dataset Description
+## Dataset Description
 
 The WGU Institutional Catalogs are published nearly every month and archived [on their website.](https://www.wgu.edu/about/institutional-catalog.html)  
 In the June 2025 issue, the Instructor Directory spans pages 313–331.
@@ -61,7 +61,7 @@ Last, First; Degree, University
 Entries are grouped under college headers, but the text contains occasional anomalies and formatting errors that require cleaning before analysis.
 ___
 
-### Process Overview
+## Process Overview
 
 The data extraction and cleaning process involved three main phases:
 
@@ -69,7 +69,7 @@ The data extraction and cleaning process involved three main phases:
 2. **Parse & Clean** - Handle formatting inconsistencies and data quality issues  
 3. **Normalize & Export** - Standardize degree names and output analysis-ready CSV
 
-### Raw Data Extraction
+## Raw Data Extraction
 
 The instructor directory spans pages 313-331 of the June 2025 catalog. I extracted the entire section as plain text: [instructor_data_raw.txt](instructor_data_raw.txt)
 
@@ -89,7 +89,7 @@ Clark, Jennifer; MBA, Harvard Business School
 ```
 ___
 
-### Parsing & Cleaning
+## Parsing & Cleaning
 
 My approach is to write a "base" parser, assume the catalog follows the expected structure and then lean on a few reliable “anchors” to guide the parsing. The script only cares about three things:
 	
@@ -139,7 +139,7 @@ At the end, the script:
 
 [parse_instructors.py](parse_instructors.py) is the final parser. It includes all the tolerant parsing logic described above and ensures every catalog line is accounted for and every instructor row is captured exactly once.  
 ___  
-### Degree Normalization  
+## Degree Normalization  
 
 In order to analyze questions like *how many doctorate vs master’s degrees are held in each college*, we needed to first normalize the raw degree names. The catalog data contained more than 80 unique variations such as `"Master's Degree"`, `"Masters Degree"`, `"MA"`, `"M.A."`, and even `"Master's's Degree"` with a double possessive typo.  
 
@@ -172,7 +172,7 @@ def infer_degree_level(standard):
 The cleaned dataset shows clear trends, such as the School of Technology having a noticeably higher share of instructors with master’s degrees compared to other colleges, an insight worth deeper investigation.
 ___
 
-### Instructor Alma Maters  
+## Instructor Alma Maters  
 
 The college field required minimal cleaning.  
 A full export is available here: [instructor_alma_maters.csv](instructor_alma_maters.csv), which lists each alma mater and the number of instructors from that institution.  
