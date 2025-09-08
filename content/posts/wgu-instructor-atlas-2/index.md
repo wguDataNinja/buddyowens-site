@@ -12,7 +12,7 @@ hiddenInSingle = false
 +++
 
 ## Geocoding and Maps  
-Scraping the WGU Catalog Part 2 of 3: Geocode alma mater university locations using the Google Maps API
+Scraping the WGU Catalog Part 2 of 3: Geocode WGU instructor alma mater university locations using the Google Maps API.
 
 
 ## Interactive Map
