@@ -1,12 +1,16 @@
 baseURL = "https://wguDataNinja.github.io/buddyowens-site/"
 theme = "PaperMod"
 
-paginate = 5
+# URL handling: let Hugo handle paths
+# relativeURLs = true
+# canonifyURLs = true
+
+[pagination]
+  pagerSize = 5
 
 [params]
   env = "production"
   mainSections = ["posts"]
-
   ShowReadingTime = true
   ShowShareButtons = true
   ShowPostNavLinks = true
