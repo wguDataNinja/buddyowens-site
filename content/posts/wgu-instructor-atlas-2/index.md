@@ -19,7 +19,9 @@ Part 2 of 3: Geocode alma mater university locations using the Google Maps API t
 ## Interactive Map
 {{< iframe_res src="maps/university_bubble_map.html" title="WGU Instructor Alma Maters — Bubble Map" >}}
 
----## From Part 1: Scraping the Catalog  
+---
+
+## From Part 1: Scraping the Catalog  
 In [Part 1](../wgu-instructor-atlas-1/), we parsed the June 2025 catalog into a clean dataset of WGU instructors and their alma maters:  
 [2025_06_instructors.csv](../wgu-instructor-atlas-1/2025_06_instructors.csv).  
 
@@ -29,14 +31,60 @@ That CSV serves as the input here. Each university name is geocoded to latitude/
 
 ## Geocoding the Universities  
 
-Using the **Google Maps Geocoding API**:  
-- Enabled the service in a Google Cloud project  
-- Stored the API key privately in `apikey.yaml`  
-- ~350 unique lookups, all within the free $200/month credit  
-- Cached results in `uni_geo_mapping.json`  
-- Corrected a handful of ambiguous names manually  
+Each unique university name (~350 total) was passed through the **Google Maps Geocoding API**.  
+Key features of the pipeline:  
 
+- **API key management** — kept in `config.yaml`, never hard-coded.  
+- **Caching** — results saved to [uni_geo_mapping.json](uni_geo_mapping.json) so each university is only geocoded once.  
+- **Overrides** — `uni_overrides.csv` provides corrected queries (e.g. “UCLA” → “University of California, Los Angeles”).  
+- **Manual fixes** — a handful of unmatched names (typos, obscure schools) were cleaned by hand.  
+
+Example geocoding output (as stored in JSON):  
+```json
+{
+  "Stanford University": {
+    "query": "Stanford University",
+    "formatted_address": "450 Serra Mall, Stanford, CA 94305, USA",
+    "lat": 37.4274745,
+    "lng": -122.169719,
+    "place_id": "ChIJ9T_5iuTKj4AR1p1nTSaRtuQ",
+    "source": "geocoding"
+  }
+}
+```
 ---
+Here’s the “Building the Bubble Map” section in raw Markdown:
+
+## Building the Bubble Map  
+
+Once universities were geocoded, we joined counts to coordinates:  
+
+```python
+counts = df.groupby("university").size().reset_index(name="count")
+geo = pd.DataFrame.from_dict(mapping, orient="index")
+joined = counts.merge(geo, on="university")
+```
+From there, we built an interactive map with **Folium**:  
+
+- Circle markers at each lat/lng  
+- Bubble radius proportional to sqrt(count)  
+- Popup with university name + instructor count  
+- Carto Positron tiles for clean basemap  
+- Auto-fit bounds so all points are visible  
+```python
+folium.CircleMarker(
+    location=[r["lat"], r["lng"]],
+    radius=4 + 3*math.sqrt(r["count"]),
+    fill=True, fill_opacity=0.6,
+    popup=f'{r["university"]} — {r["count"]} instructors'
+).add_to(mapp)
+```
+
+Outputs:
+- `university_counts_with_geo.csv` — counts + coordinates
+- `university_bubble_map.html` — interactive bubble map
+- `make_bubble_map.py` — rendering script
+
 
 ## Outputs  
 
@@ -46,7 +94,7 @@ Using the **Google Maps Geocoding API**:
 
 ---
 
-## Notes and Next  
+## Notes 
 
 - ~350 universities successfully mapped  
 - Total cost: **$0** (fully within free tier)  
