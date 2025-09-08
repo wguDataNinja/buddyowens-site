@@ -5,8 +5,6 @@ theme = "PaperMod"
 canonifyURLs = true
 relativeURLs = false
 
-
-
 [params]
   env = "production"
   mainSections = ["posts"]
@@ -17,17 +15,6 @@ relativeURLs = false
   ShowBreadCrumbs = true
   ShowCodeCopyButtons = true
   ShowToc = true
-  disableSpecial1stPost = true  # keep the “featured” first post if you like
-
-[params.homeInfoParams]
-Title = "Welcome"
-Content = """
-I'm Buddy Owens. This is my data science portfolio.
-
-- See **Posts** for projects
-- Browse **Tags** for topics
-- Try **Search** to explore
-"""
 
 [params.cover]
   hidden = false
@@ -35,9 +22,20 @@ I'm Buddy Owens. This is my data science portfolio.
   hiddenInSingle = false
   responsiveImages = true
 
-# hugo.toml
 [params.profileMode]
-enabled = false
+  enabled = true
+  title = "Buddy Owens"
+  subtitle = "Data Science Portfolio"
+  imageUrl = "images/avatar.png"
+  imageTitle = "Profile"
+  imageWidth = 120
+  imageHeight = 120
+  [[params.profileMode.buttons]]
+    name = "Posts"
+    url = "/posts/"
+  [[params.profileMode.buttons]]
+    name = "GitHub"
+    url = "https://github.com/YOUR_USERNAME"
 
 [[params.social]]
   name = "github"
@@ -51,4 +49,17 @@ enabled = false
   tag = "tags"
   series = "series"
 
-paginate = 5
+[menu]
+  [[menu.main]]
+    identifier = "posts"
+    name = "Posts"
+    url = "/posts/"
+    weight = 1
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 2
+
+[outputs]
+  home = [ "HTML", "RSS", "JSON" ]
