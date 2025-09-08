@@ -1,11 +1,9 @@
-baseURL = "https://buddyowens.net/"
-languageCode = "en-us"
-title = "Buddy Owens"
+baseURL = "https://wgudataniinja.github.io/buddyowens-site/"
 theme = "PaperMod"
+
+# optional for safer linking on Pages
+relativeURLs = true
 canonifyURLs = true
-relativeURLs = false
-
-
 
 [params]
   env = "production"
