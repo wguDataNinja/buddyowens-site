@@ -167,7 +167,7 @@ def infer_degree_level(standard):
      
 ***Results snapshot:***
 
-<img src="images/college_degree_barchart.png" alt="Degree mix by college" width="600"/>
+![Degree mix by college](images/college_degree_barchart.png)
 
 The cleaned dataset shows clear trends, such as the School of Technology having a noticeably higher share of instructors with master’s degrees compared to other colleges, an insight worth deeper investigation.
 ___

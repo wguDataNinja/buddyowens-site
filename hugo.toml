@@ -9,6 +9,7 @@ theme = "PaperMod"
   pagerSize = 5
 
 [params]
+  author = "Buddy Owens"
   env = "production"
   mainSections = ["posts"]
   ShowReadingTime = true
@@ -18,6 +19,11 @@ theme = "PaperMod"
   ShowCodeCopyButtons = true
   ShowToc = true
   disableSpecial1stPost = true
+
+  [params.label]
+    text = "Buddy Owens"
+    icon = "images/avatar.png"   # path relative to /static
+    iconHeight = 40              # display size in px
 
 [params.homeInfoParams]
   Title = "Welcome"
