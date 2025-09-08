@@ -24,20 +24,26 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      # Force the exact Hugo version required by PaperMod
-      - name: Install Hugo 0.149.1 (manual)
+      # Install Hugo 0.149.1 and put it FIRST on PATH (no reliance on system Hugo)
+      - name: Install Hugo 0.149.1
         run: |
+          set -euxo pipefail
           VER=0.149.1
-          curl -sL https://github.com/gohugoio/hugo/releases/download/v${VER}/hugo_extended_${VER}_Linux-64bit.tar.gz -o hugo.tgz
+          mkdir -p "$HOME/bin"
+          curl -sL "https://github.com/gohugoio/hugo/releases/download/v${VER}/hugo_extended_${VER}_Linux-64bit.tar.gz" -o hugo.tgz
           tar -xzf hugo.tgz hugo
-          sudo mv hugo /usr/local/bin/hugo
-          hugo version
+          mv hugo "$HOME/bin/hugo"
+          chmod +x "$HOME/bin/hugo"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
 
-      - name: Verify submodules
+      - name: Verify versions and submodules
         run: |
+          set -euxo pipefail
+          which -a hugo || true
+          hugo version
           git config --file .gitmodules --list || true
           git submodule status || true
-          ls -la themes/PaperMod || true
+          test -d themes/PaperMod && ls -la themes/PaperMod || true
 
       - name: Build
         run: hugo --minify

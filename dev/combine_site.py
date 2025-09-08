@@ -5,9 +5,9 @@ import argparse
 import re
 import json
 from typing import Dict, Any, Tuple, Optional
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
-# Fixed project root
+# ==== PROJECT ROOT ====
 ROOT = Path("/Users/buddy/Desktop/projects/buddyowens-site").resolve()
 
 # Output path
@@ -24,7 +24,7 @@ IMPORTANT_FILES = [
     "config/_default/menus.toml",
     "config/_default/outputs.toml",
     "content/about/_index.md",
-    "content/search/_index.md",  # corrected
+    "content/search/_index.md",
 ]
 
 INCLUDE_PATTERNS = [
@@ -76,8 +76,7 @@ EXCLUDE_DIR_NAMES = {
 }
 EXCLUDE_NAME_SUBSTRINGS = {
     "apikey", "api_key", "secret", "credentials", ".env",
-    "uni_geo_mapping.json", "unmatched_universities",
-    ".bak",  # exclude backups
+    "uni_geo_mapping.json", "unmatched_universities", ".bak",
 }
 EXCLUDE_FILE_SUFFIXES = {
     ".lock", ".zip", ".tar", ".gz", ".map", ".bin", ".DS_Store",
@@ -133,7 +132,6 @@ def parse_front_matter(text: str) -> Tuple[Dict[str, Any], str]:
     return fm, body
 
 def _fix_tz_colon(s: str) -> str:
-    # turn 2025-09-07T02:05:29-0400 -> 2025-09-07T02:05:29-04:00
     m = re.search(r"([+-]\d{2})(\d{2})$", s)
     if m:
         return s[:m.start()] + f"{m.group(1)}:{m.group(2)}"
@@ -143,13 +141,11 @@ def parse_date(d: str | None) -> Optional[datetime]:
     if not d:
         return None
     s = str(d).strip().strip('"').strip("'")
-    # RFC3339 with or without colon in offset
     for cand in (s, _fix_tz_colon(s)):
         try:
             return datetime.fromisoformat(cand.replace("Z", "+00:00"))
         except Exception:
             pass
-    # bare date
     try:
         return datetime.strptime(s, "%Y-%m-%d").replace(tzinfo=timezone.utc)
     except Exception:
@@ -167,12 +163,155 @@ def gather_files():
         ordered_sections.append((header, files))
     return ordered_sections
 
+# ===== CI DIAGNOSTICS =====
+
+def read_text_safe(p: Path) -> str:
+    try:
+        return p.read_text(encoding="utf-8")
+    except Exception:
+        return ""
+
+def check_hugo_workflows() -> list[str]:
+    """Inspect .github/workflows for Hugo setup and version."""
+    msgs = []
+    wf_dir = ROOT / ".github" / "workflows"
+    if not wf_dir.exists():
+        msgs.append("FAIL: .github/workflows missing")
+        return msgs
+
+    wfs = [p for p in wf_dir.glob("*.*") if p.suffix in {".yml", ".yaml"}]
+    if not wfs:
+        msgs.append("FAIL: no workflow files found")
+        return msgs
+    msgs.append(f"INFO: workflows found: {[p.name for p in wfs]}")
+
+    pinned_ok = False
+    any_manual = False
+    any_setup = False
+    wrong_versions = []
+
+    for wf in wfs:
+        t = read_text_safe(wf)
+
+        # detect manual install step
+        if re.search(r"hugo_extended_\d+\.\d+\.\d+_Linux-64bit\.tar\.gz", t):
+            any_manual = True
+            ver = re.search(r"hugo_extended_(\d+\.\d+\.\d+)_Linux-64bit\.tar\.gz", t)
+            if ver and ver.group(1) == "0.149.1":
+                pinned_ok = True
+            elif ver:
+                wrong_versions.append(f"{wf.name}: manual {ver.group(1)}")
+
+        # detect actions/setup-hugo usage
+        if "actions/setup-hugo@v" in t:
+            any_setup = True
+            m = re.search(r"hugo-version:\s*\"?([0-9.]+)\"?", t)
+            if m:
+                if m.group(1) == "0.149.1":
+                    pinned_ok = True
+                else:
+                    wrong_versions.append(f"{wf.name}: setup-hugo {m.group(1)}")
+
+        # detect peaceiris/actions-hugo (older)
+        if "peaceiris/actions-hugo@v" in t and "hugo-version:" in t:
+            m2 = re.search(r"hugo-version:\s*\"?([0-9.]+)\"?", t)
+            if m2:
+                if m2.group(1) == "0.149.1":
+                    pinned_ok = True
+                else:
+                    wrong_versions.append(f"{wf.name}: peaceiris {m2.group(1)}")
+
+    if len(wfs) > 1:
+        msgs.append("WARN: multiple workflows present; ensure only one builds the site")
+
+    if pinned_ok:
+        msgs.append("PASS: Hugo pinned to 0.149.1 in workflows")
+    else:
+        msgs.append("FAIL: Hugo not pinned to 0.149.1 (PaperMod needs >=0.146); " +
+                    ("manual install found " if any_manual else "") +
+                    ("setup-hugo found " if any_setup else "") +
+                    (f"| versions: {wrong_versions}" if wrong_versions else ""))
+
+    return msgs
+
+def check_submodule() -> list[str]:
+    msgs = []
+    gm = ROOT / ".gitmodules"
+    if not gm.exists():
+        return ["FAIL: .gitmodules not found (PaperMod submodule missing)"]
+
+    txt = read_text_safe(gm)
+    url_match = re.search(r'url\s*=\s*(\S+)', txt)
+    url = url_match.group(1) if url_match else ""
+    if not url:
+        msgs.append("FAIL: PaperMod submodule URL not found in .gitmodules")
+    else:
+        if not url.endswith(".git"):
+            msgs.append(f"FAIL: submodule URL missing .git suffix: {url}")
+        if not url.startswith("https://"):
+            msgs.append(f"WARN: prefer HTTPS URL: {url}")
+        if "adityatelange/hugo-PaperMod" not in url:
+            msgs.append(f"WARN: unexpected submodule repo: {url}")
+        else:
+            msgs.append(f"PASS: submodule URL OK: {url}")
+
+    theme_dir = ROOT / "themes" / "PaperMod"
+    if not theme_dir.exists():
+        msgs.append("FAIL: themes/PaperMod directory missing")
+    else:
+        git_dir = theme_dir / ".git"
+        if git_dir.exists() or (theme_dir / ".gitmodules").exists():
+            msgs.append("PASS: themes/PaperMod present (git metadata detected)")
+        else:
+            msgs.append("WARN: themes/PaperMod present but may not be an initialized submodule")
+
+    return msgs
+
+def check_ga_partial() -> list[str]:
+    p = ROOT / "layouts" / "partials" / "google_analytics.html"
+    if p.exists():
+        return ["PASS: GA placeholder exists at layouts/partials/google_analytics.html"]
+    else:
+        return ["WARN: GA partial missing; add empty layouts/partials/google_analytics.html to silence theme error"]
+
+def parse_toml_like(text: str) -> dict:
+    """Tiny parser: grabs baseURL and theme from hugo.toml without a TOML lib."""
+    cfg = {}
+    for line in text.splitlines():
+        m = re.match(r'\s*([A-Za-z0-9_]+)\s*=\s*"(.*)"\s*$', line.strip())
+        if m:
+            cfg[m.group(1)] = m.group(2)
+        else:
+            m2 = re.match(r'\s*([A-Za-z0-9_]+)\s*=\s*(true|false)\s*$', line.strip(), re.I)
+            if m2:
+                cfg[m2.group(1)] = m2.group(2).lower() == "true"
+    return cfg
+
+def check_hugo_toml() -> list[str]:
+    msgs = []
+    ht = ROOT / "hugo.toml"
+    if not ht.exists():
+        return ["FAIL: hugo.toml not found at repo root"]
+
+    cfg = parse_toml_like(read_text_safe(ht))
+    base = cfg.get("baseURL", "")
+    theme = cfg.get("theme", "")
+
+    if base == "https://wgudataniinja.github.io/buddyowens-site/":
+        msgs.append("PASS: baseURL set for GitHub Pages")
+    else:
+        msgs.append(f"WARN: baseURL is '{base}' (expected GitHub Pages URL)")
+
+    if theme == "PaperMod":
+        msgs.append("PASS: theme = PaperMod")
+    else:
+        msgs.append(f"FAIL: theme not set to PaperMod (got '{theme}')")
+
+    return msgs
+
+# ===== Existing site summary helpers =====
+
 def list_posts_index() -> Tuple[int, list, int, int]:
-    """
-    Returns (count, rows, published_count, draft_count)
-    rows: (rel_path, title, date_str, draft_str, tags)
-    Sorted by parsed date desc (fallback mtime desc).
-    """
     posts_root = ROOT / "content" / "posts"
     rows = []
     if not posts_root.exists():
@@ -201,13 +340,9 @@ def list_posts_index() -> Tuple[int, list, int, int]:
         dt = parse_date(date_str)
         rows.append((str(rel), title, date_str, str(draft_flag).lower(), tags, dt, idx.stat().st_mtime))
 
-    # sort by dt desc; fallback to mtime desc
     rows.sort(key=lambda r: (r[5] if r[5] else datetime.fromtimestamp(r[6])), reverse=True)
-
     published = sum(1 for r in rows if r[3] == "false")
     drafts = len(rows) - published
-
-    # trim metadata before printing
     trimmed = [(r[0], r[1], r[2], r[3], r[4]) for r in rows[:MAX_POSTS_LIST]]
     return len(rows), trimmed, published, drafts
 
@@ -243,6 +378,18 @@ def write_summary(out):
         except Exception as e:
             out.write(f"[unreadable: {e}]\n\n")
 
+def write_ci_checks(out):
+    out.write("## CI CHECKS\n\n")
+    for line in check_hugo_workflows():
+        out.write(f"{line}\n")
+    for line in check_submodule():
+        out.write(f"{line}\n")
+    for line in check_ga_partial():
+        out.write(f"{line}\n")
+    for line in check_hugo_toml():
+        out.write(f"{line}\n")
+    out.write("\n")
+
 def write_sections(out, sections, paths_only: bool):
     for header, files in sections:
         out.write(f"# --- {header} ---\n\n")
@@ -270,6 +417,7 @@ def write_combined(sections, paths_only: bool, summary_only: bool):
     with OUT_FILE.open("w", encoding="utf-8") as out:
         out.write("# Combined site files for review\n\n")
         write_summary(out)
+        write_ci_checks(out)
         if summary_only:
             out.write("\n# [End: summary only]\n")
             print(f"Wrote {OUT_FILE}")
@@ -279,11 +427,11 @@ def write_combined(sections, paths_only: bool, summary_only: bool):
     print(f"Wrote {OUT_FILE}")
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Combine key Hugo site files into one review doc.")
+    parser = argparse.ArgumentParser(description="Combine key Hugo site files into one review doc + CI checks.")
     parser.add_argument("--paths-only", action="store_true",
                         help="Only list file paths for sections (previews still shown for important files).")
     parser.add_argument("--summary-only", action="store_true",
-                        help="Write only the summary (posts index + important file previews).")
+                        help="Write only the summary (posts index + important file previews + CI checks).")
     args = parser.parse_args(argv)
 
     sections = gather_files()
