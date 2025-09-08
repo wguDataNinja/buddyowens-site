@@ -24,24 +24,17 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      - name: "Debug: show Git + submodules"
-        run: |
-          git --version
-          git config --file .gitmodules --list || true
-          git submodule status || true
-
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v3
+      - name: Setup Hugo 0.149.1
+        uses: actions/setup-hugo@v4
         with:
           hugo-version: "0.149.1"
           extended: true
 
-      - name: "Debug: show Hugo + tree"
+      - name: Verify versions
         run: |
           hugo version
-          test -f hugo.toml && head -n 50 hugo.toml || echo "hugo.toml not found"
-          find . -maxdepth 2 -type d -print | sort
-          ls -la themes || true
+          git config --file .gitmodules --list || true
+          git submodule status || true
           ls -la themes/PaperMod || true
 
       - name: Build
