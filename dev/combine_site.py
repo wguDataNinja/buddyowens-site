@@ -7,11 +7,23 @@ import json
 from typing import Dict, Any, Tuple, Optional
 from datetime import datetime, timezone
 
-# ==== PROJECT ROOT ====
-ROOT = Path("/Users/buddy/Desktop/projects/buddyowens-site").resolve()
+# ==== REPO ROOT DETECTION ====
+def find_repo_root(start: Path) -> Path:
+    cur = start.resolve()
+    for _ in range(10):
+        if (cur / "hugo.toml").exists() or (cur / ".git").exists():
+            return cur
+        if cur.parent == cur:
+            break
+        cur = cur.parent
+    return start.resolve()
+
+# default: use script dir or cwd; can override with --root
+DEFAULT_ROOT = find_repo_root(Path(__file__).parent if "__file__" in globals() else Path.cwd())
 
 # Output path
-OUT_FILE = ROOT / "output" / "combined_files.txt"
+def default_out_file(root: Path) -> Path:
+    return root / "output" / "combined_files.txt"
 
 # Limits
 MAX_BYTES = 300_000
@@ -25,6 +37,7 @@ IMPORTANT_FILES = [
     "config/_default/outputs.toml",
     "content/about/_index.md",
     "content/search/_index.md",
+    "layouts/partials/google_analytics.html",
 ]
 
 INCLUDE_PATTERNS = [
@@ -82,9 +95,9 @@ EXCLUDE_FILE_SUFFIXES = {
     ".lock", ".zip", ".tar", ".gz", ".map", ".bin", ".DS_Store",
 }
 
-def is_excluded(path: Path) -> bool:
+def is_excluded(path: Path, root: Path) -> bool:
     try:
-        rel_parts = path.relative_to(ROOT).parts
+        rel_parts = path.relative_to(root).parts
     except ValueError:
         rel_parts = path.parts
     if any(part in EXCLUDE_DIR_NAMES for part in rel_parts):
@@ -151,13 +164,13 @@ def parse_date(d: str | None) -> Optional[datetime]:
     except Exception:
         return None
 
-def gather_files():
+def gather_files(root: Path):
     ordered_sections = []
     for header, patterns in INCLUDE_PATTERNS:
         files = []
         for pat in patterns:
-            for p in ROOT.glob(pat):
-                if p.is_file() and not is_excluded(p):
+            for p in root.glob(pat):
+                if p.is_file() and not is_excluded(p, root):
                     files.append(p)
         files = sorted(set(files), key=lambda x: str(x).lower())
         ordered_sections.append((header, files))
@@ -171,10 +184,10 @@ def read_text_safe(p: Path) -> str:
     except Exception:
         return ""
 
-def check_hugo_workflows() -> list[str]:
+def check_hugo_workflows(root: Path) -> list[str]:
     """Inspect .github/workflows for Hugo setup and version."""
     msgs = []
-    wf_dir = ROOT / ".github" / "workflows"
+    wf_dir = root / ".github" / "workflows"
     if not wf_dir.exists():
         msgs.append("FAIL: .github/workflows missing")
         return msgs
@@ -234,9 +247,9 @@ def check_hugo_workflows() -> list[str]:
 
     return msgs
 
-def check_submodule() -> list[str]:
+def check_submodule(root: Path) -> list[str]:
     msgs = []
-    gm = ROOT / ".gitmodules"
+    gm = root / ".gitmodules"
     if not gm.exists():
         return ["FAIL: .gitmodules not found (PaperMod submodule missing)"]
 
@@ -255,7 +268,7 @@ def check_submodule() -> list[str]:
         else:
             msgs.append(f"PASS: submodule URL OK: {url}")
 
-    theme_dir = ROOT / "themes" / "PaperMod"
+    theme_dir = root / "themes" / "PaperMod"
     if not theme_dir.exists():
         msgs.append("FAIL: themes/PaperMod directory missing")
     else:
@@ -267,52 +280,98 @@ def check_submodule() -> list[str]:
 
     return msgs
 
-def check_ga_partial() -> list[str]:
-    p = ROOT / "layouts" / "partials" / "google_analytics.html"
+def check_ga_partial(root: Path) -> list[str]:
+    p = root / "layouts" / "partials" / "google_analytics.html"
     if p.exists():
         return ["PASS: GA placeholder exists at layouts/partials/google_analytics.html"]
     else:
         return ["WARN: GA partial missing; add empty layouts/partials/google_analytics.html to silence theme error"]
 
+# tiny toml-like parser to get simple keys and booleans
+SIMPLE_KV_RE = re.compile(r'^\s*([A-Za-z0-9_]+)\s*=\s*"(.*)"\s*$')
+SIMPLE_BOOL_RE = re.compile(r'^\s*([A-Za-z0-9_]+)\s*=\s*(true|false)\s*$', re.I)
+SIMPLE_INT_RE = re.compile(r'^\s*([A-Za-z0-9_]+)\s*=\s*([0-9]+)\s*$')
+
 def parse_toml_like(text: str) -> dict:
-    """Tiny parser: grabs baseURL and theme from hugo.toml without a TOML lib."""
     cfg = {}
+    current_table = []
     for line in text.splitlines():
-        m = re.match(r'\s*([A-Za-z0-9_]+)\s*=\s*"(.*)"\s*$', line.strip())
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("[") and line.endswith("]"):
+            table = line.strip("[]").strip()
+            current_table = [p.strip() for p in table.split(".") if p.strip()]
+            continue
+        m = SIMPLE_KV_RE.match(line)
         if m:
-            cfg[m.group(1)] = m.group(2)
-        else:
-            m2 = re.match(r'\s*([A-Za-z0-9_]+)\s*=\s*(true|false)\s*$', line.strip(), re.I)
-            if m2:
-                cfg[m2.group(1)] = m2.group(2).lower() == "true"
+            key = ".".join(current_table + [m.group(1)]) if current_table else m.group(1)
+            cfg[key] = m.group(2)
+            continue
+        m2 = SIMPLE_BOOL_RE.match(line)
+        if m2:
+            key = ".".join(current_table + [m2.group(1)]) if current_table else m2.group(1)
+            cfg[key] = m2.group(2).lower() == "true"
+            continue
+        m3 = SIMPLE_INT_RE.match(line)
+        if m3:
+            key = ".".join(current_table + [m3.group(1)]) if current_table else m3.group(1)
+            cfg[key] = int(m3.group(2))
+            continue
     return cfg
 
-def check_hugo_toml() -> list[str]:
+def check_hugo_toml(root: Path) -> list[str]:
     msgs = []
-    ht = ROOT / "hugo.toml"
+    ht = root / "hugo.toml"
     if not ht.exists():
         return ["FAIL: hugo.toml not found at repo root"]
 
-    cfg = parse_toml_like(read_text_safe(ht))
-    base = cfg.get("baseURL", "")
-    theme = cfg.get("theme", "")
+    raw = read_text_safe(ht)
+    cfg = parse_toml_like(raw)
 
-    if base == "https://wgudataniinja.github.io/buddyowens-site/":
-        msgs.append("PASS: baseURL set for GitHub Pages")
+    base = str(cfg.get("baseURL", ""))
+    theme = str(cfg.get("theme", ""))
+
+    expected_base = "https://wguDataNinja.github.io/buddyowens-site/"
+
+    if base == expected_base:
+        msgs.append("PASS: baseURL set for GitHub Pages with correct casing")
     else:
-        msgs.append(f"WARN: baseURL is '{base}' (expected GitHub Pages URL)")
+        msgs.append(f"WARN: baseURL is '{base}' (expected '{expected_base}')")
 
     if theme == "PaperMod":
         msgs.append("PASS: theme = PaperMod")
     else:
         msgs.append(f"FAIL: theme not set to PaperMod (got '{theme}')")
 
+    # URL flags that often break Pages
+    rel = cfg.get("relativeURLs", None)
+    can = cfg.get("canonifyURLs", None)
+    if rel is True or can is True:
+        flags = []
+        if rel is True: flags.append("relativeURLs=true")
+        if can is True: flags.append("canonifyURLs=true")
+        msgs.append(f"WARN: {' and '.join(flags)} may break asset paths on GitHub Pages; suggest removing")
+    else:
+        msgs.append("PASS: no URL overrides detected (good)")
+
+    # Pagination checks for Hugo >= 0.128
+    # 1) deprecated key present?
+    if re.search(r'^\s*paginate\s*=\s*\d+\s*$', raw, re.M):
+        msgs.append("FAIL: deprecated 'paginate' key found; replace with [pagination] pagerSize = N")
+    # 2) modern key present?
+    pager_size = cfg.get("pagination.pagerSize", None)
+    if pager_size is not None:
+        msgs.append(f"PASS: pagination.pagerSize = {pager_size}")
+    else:
+        msgs.append("WARN: pagination.pagerSize not set; default may apply")
+
     return msgs
 
 # ===== Existing site summary helpers =====
 
-def list_posts_index() -> Tuple[int, list, int, int]:
-    posts_root = ROOT / "content" / "posts"
+def list_posts_index(root: Path) -> Tuple[int, list, int, int]:
+    posts_root = root / "content" / "posts"
     rows = []
     if not posts_root.exists():
         return 0, rows, 0, 0
@@ -321,9 +380,9 @@ def list_posts_index() -> Tuple[int, list, int, int]:
         if not bundle.is_dir():
             continue
         idx = bundle / "index.md"
-        if not idx.exists() or is_excluded(idx):
+        if not idx.exists() or is_excluded(idx, root):
             continue
-        rel = idx.relative_to(ROOT)
+        rel = idx.relative_to(root)
         try:
             text = idx.read_text(encoding="utf-8")
         except Exception:
@@ -346,11 +405,11 @@ def list_posts_index() -> Tuple[int, list, int, int]:
     trimmed = [(r[0], r[1], r[2], r[3], r[4]) for r in rows[:MAX_POSTS_LIST]]
     return len(rows), trimmed, published, drafts
 
-def write_summary(out):
+def write_summary(out, root: Path):
     out.write("# === SUMMARY ===\n\n")
-    out.write(f"Root: {ROOT}\n\n")
+    out.write(f"Root: {root}\n\n")
 
-    count, rows, published, drafts = list_posts_index()
+    count, rows, published, drafts = list_posts_index(root)
     out.write(f"## Posts ({count})  —  Published: {published}  Drafts: {drafts}\n\n")
     if not rows:
         out.write("[none]\n\n")
@@ -363,8 +422,8 @@ def write_summary(out):
 
     out.write("## Important Files (previews)\n\n")
     for rel in IMPORTANT_FILES:
-        p = ROOT / rel
-        if not p.exists() or not p.is_file() or is_excluded(p):
+        p = root / rel
+        if not p.exists() or not p.is_file() or is_excluded(p, root):
             continue
         out.write(f"### {rel}\n\n")
         try:
@@ -378,26 +437,26 @@ def write_summary(out):
         except Exception as e:
             out.write(f"[unreadable: {e}]\n\n")
 
-def write_ci_checks(out):
+def write_ci_checks(out, root: Path):
     out.write("## CI CHECKS\n\n")
-    for line in check_hugo_workflows():
+    for line in check_hugo_workflows(root):
         out.write(f"{line}\n")
-    for line in check_submodule():
+    for line in check_submodule(root):
         out.write(f"{line}\n")
-    for line in check_ga_partial():
+    for line in check_ga_partial(root):
         out.write(f"{line}\n")
-    for line in check_hugo_toml():
+    for line in check_hugo_toml(root):
         out.write(f"{line}\n")
     out.write("\n")
 
-def write_sections(out, sections, paths_only: bool):
+def write_sections(out, sections, root: Path, paths_only: bool):
     for header, files in sections:
         out.write(f"# --- {header} ---\n\n")
         if not files:
             out.write("# [none]\n\n")
             continue
         for fp in files:
-            rel = fp.relative_to(ROOT)
+            rel = fp.relative_to(root)
             out.write(f"# {rel}\n\n")
             if paths_only:
                 continue
@@ -412,30 +471,37 @@ def write_sections(out, sections, paths_only: bool):
                 out.write("# [skipped: non-text or unreadable]\n")
             out.write("\n\n")
 
-def write_combined(sections, paths_only: bool, summary_only: bool):
-    OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with OUT_FILE.open("w", encoding="utf-8") as out:
+def write_combined(root: Path, out_file: Path, sections, paths_only: bool, summary_only: bool):
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    with out_file.open("w", encoding="utf-8") as out:
         out.write("# Combined site files for review\n\n")
-        write_summary(out)
-        write_ci_checks(out)
+        write_summary(out, root)
+        write_ci_checks(out, root)
         if summary_only:
             out.write("\n# [End: summary only]\n")
-            print(f"Wrote {OUT_FILE}")
+            print(f"Wrote {out_file}")
             return
         out.write("\n")
-        write_sections(out, sections, paths_only=paths_only)
-    print(f"Wrote {OUT_FILE}")
+        write_sections(out, sections, root=root, paths_only=paths_only)
+    print(f"Wrote {out_file}")
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Combine key Hugo site files into one review doc + CI checks.")
+    parser.add_argument("--root", type=str, default=str(DEFAULT_ROOT),
+                        help="Path to the repository root (defaults to auto-detected).")
+    parser.add_argument("--out", type=str, default=None,
+                        help="Output file path (defaults to <root>/output/combined_files.txt).")
     parser.add_argument("--paths-only", action="store_true",
                         help="Only list file paths for sections (previews still shown for important files).")
     parser.add_argument("--summary-only", action="store_true",
                         help="Write only the summary (posts index + important file previews + CI checks).")
     args = parser.parse_args(argv)
 
-    sections = gather_files()
-    write_combined(sections, paths_only=args.paths_only, summary_only=args.summary_only)
+    root = Path(args.root).resolve()
+    out_file = Path(args.out).resolve() if args.out else default_out_file(root)
+
+    sections = gather_files(root)
+    write_combined(root, out_file, sections, paths_only=args.paths_only, summary_only=args.summary_only)
 
 if __name__ == "__main__":
     sys.exit(main())

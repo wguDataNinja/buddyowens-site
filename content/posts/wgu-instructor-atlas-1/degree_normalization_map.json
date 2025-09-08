@@ -1,0 +1,32 @@
+{
+  "Doctorate Degree": "PhD",
+  "PhD": "PhD",
+  "EdD": "EdD",
+  "DBA": "DBA",
+  "DNP": "DNP",
+  "JD": "JD",
+  "MD": "MD",
+  "EdS": "EdS",
+
+  "Master's Degree": "Master",
+  "MA": "MA",
+  "MS": "MS",
+  "MBA": "MBA",
+  "MEd": "MEd",
+  "MSEd": "MEd",
+  "MPA": "MPA",
+  "MPH": "MPH",
+  "MSN": "MSN",
+  "MLIS": "MLIS",
+  "MSIT": "MSIT",
+  "MSCS": "MSCS",
+
+  "Bachelor's Degree": "Bachelor",
+  "BA": "BA",
+  "BS": "BS",
+  "BSN": "BSN",
+
+  "Associate's Degree": "Associate",
+  "AA": "AA",
+  "AS": "AS"
+}

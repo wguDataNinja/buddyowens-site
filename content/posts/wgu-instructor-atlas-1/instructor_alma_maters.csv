@@ -1,0 +1,410 @@
+university,count
+Western Governors University,70
+Capella University,70
+Walden University,39
+Northcentral University,34
+University of Phoenix,34
+Nova Southeastern University,21
+Liberty University,21
+Argosy University,18
+Grand Canyon University,13
+Arizona State University,10
+University of Utah,10
+University of Central Florida,10
+University of South Carolina,9
+Colorado Technical University,9
+University of Alabama,8
+Samford University,8
+University of Missouri,7
+University of Tennessee,7
+Regent University,7
+Purdue University,7
+Indiana University,7
+Marquette University,6
+Texas Tech University,6
+University of South Florida,6
+Kent State University,6
+University of Houston,6
+Southern Illinois University,6
+Ohio University,6
+University of Iowa,6
+University of Arizona,6
+University of Memphis,5
+University of Cincinnati,5
+University of Pittsburgh,5
+University of Colorado,5
+George Washington University,5
+University of Kentucky,5
+University of Florida,5
+University of Illinois at Chicago,5
+Florida Institute of Technology,5
+Brigham Young University,5
+American Sentinel University,5
+University of Texas Arlington,5
+Ohio State University,5
+Auburn University,5
+University of the Cumberlands,4
+Indiana Wesleyan University,4
+University of North Carolina Wilmington,4
+University of Southern Mississippi,4
+University of Nevada Las Vegas,4
+Central Michigan University,4
+Virginia Tech,4
+DeVry University,4
+Trevecca Nazarene University,4
+American Intercontinental University,4
+Florida Atlantic University,4
+Virginia University of Lynchburg,4
+Chamberlain University,4
+University of Washington,4
+Keiser University,4
+University of Idaho,4
+Clark Atlanta University,4
+California Southern University,4
+Louisiana State University,4
+University of Texas,4
+University of Tulsa,4
+Texas Woman's University,3
+Saint Louis University,3
+University of Georgia,3
+Northern Illinois University,3
+Montana State University,3
+University of Delaware,3
+George Mason University,3
+Old Dominion University,3
+Oklahoma State University,3
+Jackson State University,3
+Michigan Technological University,3
+Pace University,3
+Rush University,3
+Texas A&M University,3
+Maryland University of Integrative Health,3
+Kaplan University,3
+Trident University,3
+SUNY at Albany,3
+West Virginia University,3
+Westminster College,3
+Bowling Green State University,3
+Colorado State University,3
+University of North Florida,3
+University of Nebraska,3
+Baylor University,3
+Barry University,3
+Washington State University,3
+University of Northern Colorado,3
+Drexel University,3
+Webster University,3
+University of Virginia,3
+University of North Dakota,3
+University of Oklahoma,3
+University of Maryland University College,3
+Widener University,3
+University of Indianapolis,3
+University of South Dakota,3
+North Carolina State University,3
+University of Texas at San Antonio,2
+Saybrook University,2
+University of Toledo,2
+University of St. Francis,2
+Rutgers University,2
+Seton Hall University,2
+Southeastern University,2
+University of Illinois,2
+Post University,2
+University of Wisconsin,2
+Regis College,2
+University of Wisconsin Milwaukee,2
+Utah State University,2
+Southern Methodist University,2
+Oregon State University,2
+Wayne State University,2
+Northwest Nazarene University,2
+Northern Kentucky University,2
+William Carey University,2
+Northern Arizona University,2
+Northeastern University,2
+Wilmington University,2
+NorthCentral University,2
+University of Southern California,2
+Strayer University,2
+Southern New Hampshire University,2
+University of Minnesota Duluth,2
+University of Illinois at Urbana-Champaign,2
+University of Fairfax,2
+University of Denver,2
+University of Connecticut,2
+University of Kansas,2
+University of Louisiana Monroe,2
+University of Maryland,2
+University of Massachusetts Amherst,2
+"University of California, Santa Barbara",2
+University of California San Diego,2
+University of California Irvine,2
+University of Arkansas,2
+University of Minnesota,2
+University of Alabama at Birmingham,2
+Union Institute and University,2
+Southwest Baptist University,2
+Tulane University,2
+Troy University,2
+Trident University International,2
+University of North Carolina Greensboro,2
+University of North Carolina at Chapel Hill,2
+University of North Carolina at Charlotte,2
+Touro University,2
+Texas A&M University Commerce,2
+University of North Texas,2
+University of South Alabama,2
+Syracuse University,2
+University of Hartford,2
+Stony Brook University,2
+Southwestern College,2
+North Central University,2
+A.T. Still University,2
+Franklin University,2
+Georgia State University,2
+Gwynedd Mercy University,2
+Illinois State University,2
+Lynn University,2
+Loyola University Chicago,2
+Concordia University,2
+Capitol College,2
+Capitol Technology University,2
+Columbia Southern University,2
+Case Western Reserve University,2
+Chamberlain College of Nursing,2
+Chatham University,2
+Chicago School of Professional Psychology,2
+Cleveland State University,2
+Claremont Graduate University,2
+City University of Seattle,2
+Boston College,2
+Kennesaw State University,2
+Middle Tennessee State University,2
+Florida International University,2
+Emory University,2
+Murray State University,2
+New York University,2
+Eastern Kentucky University,2
+Mississippi State University,2
+East Tennessee State University,2
+Duquesne University,2
+East Carolina University,1
+University of New Hampshire,1
+University of New Orleans,1
+University of North Carolina Chapel Hill,1
+Concordia University Texas,1
+Concordia University - Portland,1
+ECPI University,1
+College of William and Mary,1
+Columbia University,1
+Converse College,1
+College of St. Scholastica,1
+College of Santa Fe,1
+University of Notre Dame,1
+College of Saint Scholastica,1
+"University of Illinois, Urbana-Champaign",1
+"University of Illinois, Urbana",1
+University of New England,1
+University of LaVerne,1
+University of Louisiana at Monroe,1
+University of Minnesota - Twin Cities,1
+University of Louisville,1
+Duke University School of Law,1
+University of Maryland Baltimore County,1
+Duke University,1
+Dublin City University,1
+Drew University,1
+University of Miami,1
+University of Michigan,1
+University of Michigan Dearborn,1
+Delaware State University,1
+University of Louisiana at Lafayette,1
+University of Nevada,1
+DePaul University,1
+University of Redlands,1
+University of Missouri - Kansas City,1
+University of Missouri - St Louis,1
+University of Louisiana,1
+University of Missouri St. Louis,1
+University of Liverpool,1
+University of Montana,1
+Courtauld Institute of Art,1
+University of Nebraska at Omaha,1
+Dakota State University,1
+Champlain College,1
+University of Sarasota,1
+University of the District of Columbia,1
+Valdosta State University,1
+Vanderbilt University,1
+Vanderbuilt University,1
+Villanova University,1
+Virginia Commonwealth University,1
+Bethel University,1
+Benedictine University,1
+Bellevue University,1
+Ball State University,1
+Baker College,1
+Augustana College,1
+Aspen University,1
+Western Carolina University,1
+Ashford University,1
+Western Michigan University,1
+Western Washington University,1
+Amos Tuck School Dartmouth College,1
+Wichita State University,1
+Alvernia University,1
+Willamette University,1
+Alabama State University,1
+William Howard Taft Univeristy,1
+William Howard Taft University,1
+William Woods University,1
+Alabama A&M University,1
+Binghamton University,1
+University of Wisconsin-Milwaukee,1
+City University of New York,1
+University of Wisconsin-Madison,1
+University of South Carolina-Columbia,1
+University of Illinois Springfield,1
+University of Southern Indiana,1
+University of Stirling,1
+University of Sunderland,1
+University of Tampa,1
+Carroll College,1
+University of Tennessee Health Science Center,1
+University of Texas Health Science Center,1
+University of Texas Medical Branch,1
+University of Texas Rio Grande Valley,1
+University of Texas Southwestern Medical Center,1
+University of Texas at Arlington,1
+University of Texas at Austin,1
+University of Texas at El Paso,1
+California State University San Marcos,1
+University of Texas at Tyler,1
+California State University Fullerton,1
+California State University - East Bay,1
+California Institute of Integral Studies,1
+Cal State University Monterey Bay,1
+Bryan University,1
+University of West Georgia,1
+Brigham Young University - Idaho,1
+Boston University,1
+Fielding Graduate University,1
+North Carolina A&T State University,1
+University of Illinois Chicago,1
+Loma Linda University,1
+Marymount University,1
+Marshall University,1
+Regis University,1
+Robert Morris University,1
+Rowan University,1
+Maria Curie Sklodowska University,1
+SANS Technology Institute,1
+Abilene Christian University,1
+Loyola University New Orleans,1
+Sam Houston State University,1
+San Jose State University,1
+Louisiana Tech University,1
+Shri JJT University,1
+State University of New York at Albany,1
+South Dakota Sate University,1
+South Dakota State University,1
+Lipscomb University,1
+Lindenwood University,1
+Southern Illinois University Carbondale,1
+"Southern Illinois University, Carbondale",1
+Life University,1
+Libery University,1
+Southern Utah University,1
+Liberty University School of Law,1
+Lehigh University,1
+St. Cloud State University,1
+Radford University,1
+Quinnipiac University School of Law,1
+Purdue University Northwest,1
+Maryville University,1
+New York Institute of Technology,1
+New Jersey Institute of Technology,1
+New Jersey City University,1
+Naval Postgraduate School,1
+Morehouse School of Medicine,1
+Monmouth University,1
+Nottingham Trent University,1
+Nova Southeastern,1
+Oakland University,1
+Ohio Northern University,1
+Minnesota State University Mankato,1
+Minnesota School of Business,1
+Miles Law School,1
+Middlebury College,1
+Otterbein University,1
+Our Lady of the Lake University,1
+Michigan State University,1
+Pace University School of Law,1
+Penn State University,1
+Pepperdine University,1
+Peru State College,1
+PhD Capella University,1
+Phoenix University,1
+Portland State University,1
+Medical University of South Carolina,1
+St. John's University,1
+Stetson University College of Law,1
+Florida State University,1
+"University of California, Los Angeles",1
+Hope Bible Institute and Seminary,1
+University of Arizona Global Campus,1
+University of Arkansas Little Rock,1
+University of Baltimore School of Law,1
+University of Buffalo,1
+University of Calcutta,1
+University of California,1
+University of California - Irvine,1
+University of California Davis,1
+Grambling State University,1
+Graceland University,1
+"University of California, Irvine",1
+Gonzaga University,1
+Stevens Institute of Technology,1
+University of Cambridge,1
+Georgia Southern University,1
+Georgia Institute of Technology,1
+University of Colorado Denver,1
+George Fox University,1
+University of Dallas,1
+Gardner-Webb University,1
+Gardner Webb University,1
+Frostburg State University,1
+Friends University,1
+Fordham University,1
+Fontbonne University,1
+Howard University,1
+University of Akron,1
+University of Advancing Technology,1
+University at Buffalo,1
+Stevenson University,1
+Lamar University,1
+LaSalle University,1
+King College,1
+Teachers College Columbia University,1
+Temple University,1
+Kansas State University,1
+Texas Southern University,1
+Texas State University,1
+Texas State University - San Marcos,1
+Johnson University,1
+Iowa State University,1
+The Catholic University of America,1
+The Chicago School of Professional Psychology,1
+Tiffin University,1
+Iona College,1
+Institute for Doctoral Studies in the Visual Arts,1
+Indiana University-Purdue University Indianapolis,1
+Indiana University of Pennsylvania,1
+Indiana University Bloomington,1
+Indiana State University,1
+Indian Institute of Technology Bombay,1
+University College Cork,1
+University at Albany,1
+"University at Albany, State University of New York",1
+Yildiz Technical University,1

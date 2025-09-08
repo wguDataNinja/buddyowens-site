@@ -16,34 +16,36 @@ Root: /Users/buddy/Desktop/projects/buddyowens-site
 ### hugo.toml
 
 ```text
-baseURL = "https://wgudataninja.github.io/buddyowens-site/"
+baseURL = "https://wguDataNinja.github.io/buddyowens-site/"
 theme = "PaperMod"
 
-# optional for safer linking on Pages
-relativeURLs = true
-canonifyURLs = true
+# URL handling: let Hugo handle paths
+# relativeURLs = true
+# canonifyURLs = true
+
+[pagination]
+  pagerSize = 5
 
 [params]
   env = "production"
   mainSections = ["posts"]
-
   ShowReadingTime = true
   ShowShareButtons = true
   ShowPostNavLinks = true
   ShowBreadCrumbs = true
   ShowCodeCopyButtons = true
   ShowToc = true
-  disableSpecial1stPost = true  # keep the “featured” first post if you like
+  disableSpecial1stPost = true
 
 [params.homeInfoParams]
-Title = "Welcome"
-Content = """
-I'm Buddy Owens. This is my data science portfolio.
+  Title = "Welcome"
+  Content = """
+  I'm Buddy Owens. This is my data science portfolio.
 
-- See **Posts** for projects
-- Browse **Tags** for topics
-- Try **Search** to explore
-"""
+  - See **Posts** for projects
+  - Browse **Tags** for topics
+  - Try **Search** to explore
+  """
 
 [params.cover]
   hidden = false
@@ -51,9 +53,8 @@ I'm Buddy Owens. This is my data science portfolio.
   hiddenInSingle = false
   responsiveImages = true
 
-# hugo.toml
 [params.profileMode]
-enabled = false
+  enabled = false
 
 [[params.social]]
   name = "github"
@@ -66,9 +67,6 @@ enabled = false
 [taxonomies]
   tag = "tags"
   series = "series"
-
-paginate = 5
-
 ```
 
 ### config/_default/menus.toml
@@ -116,6 +114,12 @@ layout = "search"
 
 ```
 
+### layouts/partials/google_analytics.html
+
+```text
+{{/* noop placeholder to satisfy PaperMod if GA not configured */}}
+```
+
 ## CI CHECKS
 
 INFO: workflows found: ['deploy.yml']
@@ -123,8 +127,10 @@ FAIL: Hugo not pinned to 0.149.1 (PaperMod needs >=0.146);
 PASS: submodule URL OK: https://github.com/adityatelange/hugo-PaperMod.git
 PASS: themes/PaperMod present (git metadata detected)
 PASS: GA placeholder exists at layouts/partials/google_analytics.html
-WARN: baseURL is 'https://wgudataninja.github.io/buddyowens-site/' (expected GitHub Pages URL)
+PASS: baseURL set for GitHub Pages with correct casing
 PASS: theme = PaperMod
+PASS: no URL overrides detected (good)
+PASS: pagination.pagerSize = 5
 
 
 # --- CONFIG ---
@@ -192,34 +198,36 @@ weight = 4
 
 # hugo.toml
 
-baseURL = "https://wgudataninja.github.io/buddyowens-site/"
+baseURL = "https://wguDataNinja.github.io/buddyowens-site/"
 theme = "PaperMod"
 
-# optional for safer linking on Pages
-relativeURLs = true
-canonifyURLs = true
+# URL handling: let Hugo handle paths
+# relativeURLs = true
+# canonifyURLs = true
+
+[pagination]
+  pagerSize = 5
 
 [params]
   env = "production"
   mainSections = ["posts"]
-
   ShowReadingTime = true
   ShowShareButtons = true
   ShowPostNavLinks = true
   ShowBreadCrumbs = true
   ShowCodeCopyButtons = true
   ShowToc = true
-  disableSpecial1stPost = true  # keep the “featured” first post if you like
+  disableSpecial1stPost = true
 
 [params.homeInfoParams]
-Title = "Welcome"
-Content = """
-I'm Buddy Owens. This is my data science portfolio.
+  Title = "Welcome"
+  Content = """
+  I'm Buddy Owens. This is my data science portfolio.
 
-- See **Posts** for projects
-- Browse **Tags** for topics
-- Try **Search** to explore
-"""
+  - See **Posts** for projects
+  - Browse **Tags** for topics
+  - Try **Search** to explore
+  """
 
 [params.cover]
   hidden = false
@@ -227,9 +235,8 @@ I'm Buddy Owens. This is my data science portfolio.
   hiddenInSingle = false
   responsiveImages = true
 
-# hugo.toml
 [params.profileMode]
-enabled = false
+  enabled = false
 
 [[params.social]]
   name = "github"
@@ -242,9 +249,6 @@ enabled = false
 [taxonomies]
   tag = "tags"
   series = "series"
-
-paginate = 5
-
 
 # --- CI ---
 

@@ -1,4 +1,4 @@
-Here’s a cleaned-up continuation of your dev log with today’s work added.
+Here’s the updated log with today’s work added.
 
 ⸻
 
@@ -60,6 +60,38 @@ Dev Log — Buddy Owens Site (Hugo + PaperMod)
 	•	Fill in About page with bio, links, and contact info.
 	•	Link local repo to GitHub Desktop and push to remote (wgudataniinja/buddyowens-site).
 	•	Begin setting up GitHub Actions + SFTP deployment workflow.
+
+⸻
+
+2025-09-08 → 2025-09-09 Carryover
+	•	CI/CD
+	•	Added .github/workflows/deploy.yml with Hugo build + GitHub Pages deploy.
+	•	Fixed Hugo version mismatch (needed ≥0.146, runner had 0.134).
+	•	Installed Hugo 0.149.1 manually; updated workflow guard.
+	•	Added empty google_analytics.html partial to satisfy PaperMod.
+	•	First deploy succeeded, but CSS missing.
+	•	Deployment fixes (today)
+	•	Corrected baseURL casing in hugo.toml → https://wguDataNinja.github.io/buddyowens-site/.
+	•	Removed relativeURLs and canonifyURLs.
+	•	Replaced deprecated paginate with [pagination].pagerSize.
+	•	Redeployed; styles load correctly. Site confirmed working on GitHub Pages.
+	•	Tooling update
+	•	Enhanced combine_site.py:
+	•	Auto-detect repo root (or pass --root).
+	•	Check baseURL casing.
+	•	Flag relative/canonify settings.
+	•	Validate [pagination] pagerSize vs deprecated paginate.
+	•	Preview GA partial.
+	•	Current status
+	•	Site builds and deploys cleanly.
+	•	Pages (About, Search, Tags, Posts) exist but mostly placeholders.
+	•	Ready for content fill-in.
+	•	Next steps
+	•	Write About page content.
+	•	Add homepage intro text.
+	•	Flesh out posts.
+	•	Configure social links.
+	•	Begin polishing theme overrides (CSS, footer, etc).
 
 ⸻
 
