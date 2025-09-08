@@ -1,9 +1,7 @@
-baseURL = "https://wgudataninja.github.io/buddyowens-site/"
+baseURL = "https://wguDataNinja.github.io/buddyowens-site/"
 theme = "PaperMod"
 
-# optional for safer linking on Pages
-relativeURLs = true
-canonifyURLs = true
+paginate = 5
 
 [params]
   env = "production"
@@ -15,17 +13,17 @@ canonifyURLs = true
   ShowBreadCrumbs = true
   ShowCodeCopyButtons = true
   ShowToc = true
-  disableSpecial1stPost = true  # keep the “featured” first post if you like
+  disableSpecial1stPost = true
 
 [params.homeInfoParams]
-Title = "Welcome"
-Content = """
-I'm Buddy Owens. This is my data science portfolio.
+  Title = "Welcome"
+  Content = """
+  I'm Buddy Owens. This is my data science portfolio.
 
-- See **Posts** for projects
-- Browse **Tags** for topics
-- Try **Search** to explore
-"""
+  - See **Posts** for projects
+  - Browse **Tags** for topics
+  - Try **Search** to explore
+  """
 
 [params.cover]
   hidden = false
@@ -33,9 +31,8 @@ I'm Buddy Owens. This is my data science portfolio.
   hiddenInSingle = false
   responsiveImages = true
 
-# hugo.toml
 [params.profileMode]
-enabled = false
+  enabled = false
 
 [[params.social]]
   name = "github"
@@ -48,5 +45,3 @@ enabled = false
 [taxonomies]
   tag = "tags"
   series = "series"
-
-paginate = 5
