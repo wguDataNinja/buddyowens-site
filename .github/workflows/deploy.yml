@@ -24,15 +24,17 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      - name: Setup Hugo 0.149.1
-        uses: actions/setup-hugo@v4
-        with:
-          hugo-version: "0.149.1"
-          extended: true
-
-      - name: Verify versions
+      # Force the exact Hugo version required by PaperMod
+      - name: Install Hugo 0.149.1 (manual)
         run: |
+          VER=0.149.1
+          curl -sL https://github.com/gohugoio/hugo/releases/download/v${VER}/hugo_extended_${VER}_Linux-64bit.tar.gz -o hugo.tgz
+          tar -xzf hugo.tgz hugo
+          sudo mv hugo /usr/local/bin/hugo
           hugo version
+
+      - name: Verify submodules
+        run: |
           git config --file .gitmodules --list || true
           git submodule status || true
           ls -la themes/PaperMod || true
