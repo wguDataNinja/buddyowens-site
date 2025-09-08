@@ -1,5 +1,5 @@
 +++
-title = "WGU Instructor Atlas 2 — Geocoding and Maps"
+title = "WGU Instructor Atlas Part 2 - Geocoding"
 date = 2025-08-22T14:42:00-04:00
 draft = false
 tags = ['geocoding', 'WGU-catalog']
@@ -12,8 +12,7 @@ hiddenInSingle = false
 +++
 
 ## Geocoding and Maps  
-Part 2 of 3: Geocode alma mater university locations using the Google Maps API to produce an interactive bubble map of WGU instructors’ degrees.  
-<!--more-->
+Scraping the WGU Catalog Part 2 of 3: Geocode alma mater university locations using the Google Maps API
 
 
 ## Interactive Map
@@ -53,7 +52,6 @@ Example geocoding output (as stored in JSON):
 }
 ```
 ---
-Here’s the “Building the Bubble Map” section in raw Markdown:
 
 ## Building the Bubble Map  
 
@@ -102,7 +100,7 @@ Outputs:
 
 ## Next in the Series
 
-In **Part 3**, we’ll move beyond alma maters to the **research output of WGU faculty**.  
+In **Part 3**, we’ll look to the **research output of WGU faculty**.  
 Using the [Semantic Scholar API](https://api.semanticscholar.org/), we:  
 - Query by instructor name and institution to identify published works  
 - Build a reproducible archive of journal articles, conference papers, and books  
