@@ -24,7 +24,15 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      # Install Hugo 0.149.1 and put it FIRST on PATH (no reliance on system Hugo)
+      # Show what the runner sees BEFORE we install Hugo
+      - name: Debug Hugo (pre-install)
+        run: |
+          set -euxo pipefail
+          echo "PRE PATH=$PATH"
+          which -a hugo || true
+          hugo version || true
+
+      # Install Hugo 0.149.1 and put it first on PATH
       - name: Install Hugo 0.149.1
         run: |
           set -euxo pipefail
@@ -36,13 +44,23 @@ jobs:
           chmod +x "$HOME/bin/hugo"
           echo "$HOME/bin" >> "$GITHUB_PATH"
 
-      - name: Verify versions and submodules
+      # Prove our Hugo is first, and hard-fail if not exact
+      - name: Debug Hugo (post-install) and guard
         run: |
           set -euxo pipefail
+          echo "POST PATH=$PATH"
           which -a hugo || true
           hugo version
+          hv=$(hugo version | awk '{print $2}' | sed 's/^v//; s/+.*$//')
+          test "$hv" = "0.149.1" || { echo "Wrong Hugo version: $hv"; exit 1; }
+
+      # Ensure submodule is initialized on the runner
+      - name: Verify submodules
+        run: |
+          set -euxo pipefail
           git config --file .gitmodules --list || true
-          git submodule status || true
+          git submodule sync --recursive
+          git submodule update --init --recursive
           test -d themes/PaperMod && ls -la themes/PaperMod || true
 
       - name: Build
