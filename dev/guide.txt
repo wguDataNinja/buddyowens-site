@@ -1,0 +1,277 @@
+
+Buddy Owens — Portfolio Website (Master Doc)
+
+1. Project Overview
+	•	Static site using Hugo + PaperMod
+	•	Purpose: showcase data science projects
+	•	Deployment: build locally → zip public/ → upload/extract in cPanel (to start).
+	•	Later: GitHub Actions + SFTP for hands-off deploy.
+
+⸻
+
+2. Current State (2025-09-05)
+	•	Hugo site created
+	•	PaperMod theme installed
+	•	Configured hugo.toml (title, footer, copyright, params)
+	•	Posts:
+	•	Old stubs removed
+	•	New WGU Instructor Atlas 1 — Scraping post (bundle with cover image)
+	•	PaperMod cover configuration fixed ([cover] table format, not string)
+	•	Footer simplified (partial + config)
+	•	Build/deploy steps tested and working locally (hugo server -D)
+
+⸻
+
+3. Current File Structure (relevant parts)
+
+hugo.toml
+archetypes/default.md
+archetypes/posts/index.md       # custom archetype for bundles
+layouts/partials/footer.html
+layouts/shortcodes/plotly_res.html
+layouts/shortcodes/datatable_res.html
+assets/css/extended/site.css
+content/
+  posts/
+    wgu-instructors-1-scrape/
+      index.md
+      images/wgu_instructor_atlas_part1.png
+dev/log.md
+
+
+⸻
+
+4. Dev Log (initial summary)
+	•	Site setup completed
+	•	First test posts added → removed
+	•	PaperMod cover issue fixed (cover.image)
+	•	Footer customized
+	•	Deployment tested
+	•	Working post bundle confirmed (WGU Instructor Atlas 1)
+
+⸻
+
+5. Code Utilities
+
+Combine Script (collects config, archetypes, layouts, content, logs into one file)
+
+# combine_site.py
+import os
+
+def collect_files(root_dirs, output_file):
+    with open(output_file, "w") as out:
+        for root in root_dirs:
+            for subdir, _, files in os.walk(root):
+                for f in files:
+                    path = os.path.join(subdir, f)
+                    out.write(f"\n=== {path} ===\n")
+                    with open(path) as fh:
+                        out.write(fh.read() + "\n")
+
+if __name__ == "__main__":
+    roots = ["hugo.toml", "archetypes", "layouts", "content", "dev"]
+    collect_files(roots, "output/combined_files.txt")
+
+
+⸻
+
+6. Design and Content Options
+
+A) Content Plan
+	•	Write long-form project posts (EDA, APIs, dashboards)
+	•	Each post = article + visuals
+	•	Home = blog list or cards view
+
+B) Design Options
+	•	Option A (default): PaperMod list view (fast, working now)
+	•	Option B (custom): layouts/index.html + CSS for “cards”
+
+C) Visuals Options
+	1.	PNG/SVG static screenshots
+	2.	Plotly standalone HTML in iframes
+	3.	Plotly JSON + shortcode (see below)
+	4.	DataTables for CSVs
+	5.	Observable embeds
+	6.	Full apps (Streamlit/Dash) via iframe
+
+D) Workflow
+	•	hugo new posts/<slug> → creates bundle folder
+	•	Put data/visuals inside bundle
+	•	Add <!--more--> after intro paragraph for summary split
+	•	Preview: hugo server -D
+	•	Build: hugo --environment production --cleanDestinationDir
+	•	Deploy: zip → cPanel (later automated with GitHub Actions)
+
+⸻
+
+7. Shortcodes (Reusable)
+
+layouts/shortcodes/plotly_res.html
+
+{{ $res := .Page.Resources.Get ( .Get "src" ) }}
+<div id="{{ .Get "id" }}"></div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+fetch("{{ $res.RelPermalink }}").then(r=>r.json()).then(fig=>{
+  Plotly.newPlot("{{ .Get "id" }}", fig.data, fig.layout, {responsive:true});
+});
+</script>
+
+layouts/shortcodes/datatable_res.html
+
+{{ $res := .Page.Resources.Get ( .Get "src" ) }}
+<table id="{{ .Get "id" }}"></table>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+fetch("{{ $res.RelPermalink }}").then(r=>r.text()).then(txt=>{
+  const rows = txt.trim().split("\n").map(r=>r.split(","));
+  const head = rows.shift();
+  const thead = "<thead><tr>"+head.map(h=>`<th>${h}</th>`).join("")+"</tr></thead>";
+  const tbody = "<tbody>"+rows.map(r=>"<tr>"+r.map(c=>`<td>${c}</td>`).join("")+"</tr>").join("")+"</tbody>";
+  const el = document.getElementById("{{ .Get "id" }}"); el.innerHTML = thead+tbody;
+  new DataTable(el);
+});
+</script>
+
+
+⸻
+
+8. Archetype for Consistent Posts
+
+archetypes/posts/index.md
+
++++
+title = "{{ replace .Name "-" " " | title }}"
+date = "{{ .Date }}"
+draft = true
+tags = []
+summary = ""
+
+[cover]
+image = ""
+alt = ""
+relative = true
+hidden = false
+hiddenInList = false
+hiddenInSingle = false
++++
+
+Intro paragraph. <!--more-->
+
+
+⸻
+
+9. Styling
+
+assets/css/extended/site.css
+
+.container { max-width: 1100px; }
+.wide { max-width: 900px; }
+
+
+⸻
+
+10. Config (hugo.toml)
+
+baseURL = "https://buddyowens.net/"
+languageCode = "en-us"
+title = "Buddy Owens"
+theme = "PaperMod"
+canonifyURLs = true
+relativeURLs = false
+
+[params]
+  env = "production"
+  copyright = "© 2025 Buddy Owens"
+  mainSections = ["posts"]
+
+  [params.assets]
+    disableFingerprinting = false
+    disableScrollBarStyle = false
+
+  [params.footer]
+    text = ""
+    hideCopyright = false
+
+[params.cover]
+  hidden = false
+  hiddenInList = false
+  hiddenInSingle = false
+  responsiveImages = true
+
+[taxonomies]
+  tag = "tags"
+  series = "series"
+
+
+⸻
+
+11. Deployment (Automated)
+
+.github/workflows/deploy.yml
+
+name: build-and-deploy
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+          extended: true
+      - run: hugo --environment production --cleanDestinationDir
+      - name: SFTP deploy
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          server: ${{ secrets.SFTP_HOST }}
+          port: ${{ secrets.SFTP_PORT }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          local_path: ./public/*
+          remote_path: public_html
+          delete_remote_files: true
+
+Secrets needed: SFTP_HOST, SFTP_PORT, SFTP_USERNAME, SFTP_PASSWORD.
+
+⸻
+
+12. Next Steps
+	•	Write 2–3 more real posts (with covers, JSON/CSV embeds)
+	•	Add favicon, analytics, SEO tags
+	•	SSL renewal reminder before Nov 14, 2025
+	•	Test automated GitHub Actions deploy
+	•	Decide on homepage design (list vs cards)
+
+⸻
+
+Plan
+	1.	Front matter convention
+	•	date = when the project actually happened
+	•	publishDate = when you want it visible
+	•	draft = true while writing; flip to false when ready
+	•	Avoid future publishDate unless you know you will rebuild the site after that time
+	2.	Local commands
+	•	See only published
+hugo server
+	•	See everything including drafts and future
+hugo server -D -F
+	3.	Production build
+	•	Only published content
+hugo –environment production –cleanDestinationDir
+	•	Your GitHub Actions file already does this, so drafts and future posts will not appear live
+	4.	What to change when ready
+	•	Set draft = false
+	•	Ensure publishDate is in the past if you want it live immediately
+
+
+Note on Post 3 rendering issue
+Post 3 (“Research Publications”) does not render inside the PaperMod .post-entry card on the homepage. Cause not certain, but likely due to the datatable_res shortcode: it emits <link>/<script> tags at top level, which may break the list-page layout when Hugo evaluates summaries. Options:
+	•	Guard shortcode output so it only renders on single pages (.Page.Kind check).
+	•	Or simplify the post so the homepage summary doesn’t include the shortcode.
+We may just change Post 3 content instead of modifying the shortcode.
