@@ -21,17 +21,16 @@ The output is a reproducible pipeline that generates an **interactive bubble map
 ## Interactive Map
 
 <div style="position:relative;padding-top:56.25%;">
-  <iframe
-    src="/maps/university_bubble_map.html"
-    loading="lazy"
-    title="WGU Instructor Alma Maters — Bubble Map"
-    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;">
-  </iframe>
+
+<iframe
+  src="{{ "maps/university_bubble_map.html" | relURL }}"
+  loading="lazy"
+  title="WGU Instructor Alma Maters — Bubble Map"
+  style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;">
+</iframe>
+
 </div>
 
-<noscript>
-  <img src="/maps/university_geo_distribution.png" alt="Fallback preview of instructor alma maters">
-</noscript>
 ---
 ## Geocoding the Universities
 
