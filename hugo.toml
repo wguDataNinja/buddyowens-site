@@ -1,0 +1,17 @@
+baseURL = "https://buddyowens.net/"
+languageCode = "en-us"
+title = "Buddy Owens"
+theme = "PaperMod"
+canonifyURLs = true
+relativeURLs = false
+[params]
+  env = "production"
+  mainSections = ["posts"]
+[params.cover]
+  hidden = false
+  hiddenInList = false
+  hiddenInSingle = false
+  responsiveImages = true
+[taxonomies]
+  tag = "tags"
+  series = "series"
